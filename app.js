@@ -76,11 +76,18 @@ app.use((req, res, next) => {
 // Port and Host configuration
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}/`);
+  console.log(`Server running on port ${PORT}`);
 });
 
 // Save messages to JSON file when the server shuts down
-process.on('SIGINT', () => {
-  fs.writeFileSync('./messages.json', JSON.stringify(rooms, null, 2));
-  process.exit();
-});
+const saveMessages = () => {
+  try {
+    fs.writeFileSync('./messages.json', JSON.stringify(rooms, null, 2));
+  } catch (err) {
+    console.error('Error saving messages:', err);
+  }
+};
+
+// Handle graceful shutdown
+process.on('SIGINT', saveMessages);
+process.on('SIGTERM', saveMessages);
